@@ -1,0 +1,971 @@
+# Тема 2. Методи в Java
+>Перед початком роботи з файлом рекомендую переглянути відео. Посилання: https://www.youtube.com/watch?v=H-GdX1Tw008&list=PL7vq4D0vOpQbW4oply2GMQjVeYHNi05-I&index=10. Зверніть увагу, у відео методи називають "функцією". Це не помилка, це просто інша назва методів.
+
+
+> **Як працювати з цим файлом.** Читайте розділи по черзі. Кожен приклад коду — це **повна програма**: створіть клас із такою самою назвою, вставте код і запустіть.
+>
+> Коментар `// 7` поруч із `System.out.println(...)` показує, що буде виведено на екран. Рядки з позначкою `ПОМИЛКА` закоментовані навмисно: розкоментуйте їх, щоб побачити, як реагує компілятор.
+
+## Зміст
+
+1. [Що таке метод і навіщо він потрібен](#1-що-таке-метод-і-навіщо-він-потрібен)
+2. [Будова методу](#2-будова-методу)
+3. [Правила оголошення методу](#3-правила-оголошення-методу)
+4. [Виклик методу](#4-виклик-методу)
+5. [Параметри і аргументи](#5-параметри-і-аргументи)
+6. [Оператор return](#6-оператор-return)
+7. [Види методів](#7-види-методів)
+8. [Перевантаження методів](#8-перевантаження-методів)
+9. [Методи зі змінною кількістю аргументів](#9-методи-зі-змінною-кількістю-аргументів)
+10. [Як передаються аргументи: передача за значенням](#10-як-передаються-аргументи-передача-за-значенням)
+11. [Область видимості змінних](#11-область-видимості-змінних)
+12. [Рекурсія](#12-рекурсія)
+13. [Як писати хороші методи](#13-як-писати-хороші-методи)
+14. [Шпаргалка: типові помилки](#14-шпаргалка-типові-помилки)
+
+---
+
+## 1. Що таке метод і навіщо він потрібен
+
+**Метод** — це іменований блок коду, який виконує одну конкретну дію. Метод пишуть один раз, а потім **викликають** за іменем стільки разів, скільки потрібно.
+
+Можна уявити метод як команду: ви даєте їй назву («порахувати середнє», «вивести звіт»), один раз описуєте, як її виконувати, і далі просто кажете назву.
+
+Ви вже користувалися методами, навіть якщо не писали власних:
+- `main` — головний метод, з якого починається програма;
+- `System.out.println(...)` — метод, що виводить текст;
+- `Math.round(...)`, `Integer.parseInt(...)` — методи, що обчислюють і **повертають** результат.
+
+**Навіщо писати свої методи:**
+- **не повторювати код** — однакові дії описуються один раз;
+- **читабельність** — `printReport()` зрозуміліше, ніж 20 рядків коду без назви;
+- **легше виправляти** — помилку правимо в одному місці, а не в кожній копії;
+- **розбиття задачі на частини** — велику задачу легше розв'язати як набір маленьких.
+
+Порівняйте: програма **без** методу і **з** методом.
+
+```java
+public class WithoutMethod {
+    public static void main(String[] args) {
+        // Той самий код повторюється тричі
+        System.out.println("==========");
+        System.out.println("Звіт 1");
+        System.out.println("==========");
+        System.out.println("Звіт 2");
+        System.out.println("==========");
+        System.out.println("Звіт 3");
+    }
+}
+```
+
+```java
+public class WithMethod {
+
+    // Оголошення методу: описуємо дію один раз
+    static void printLine() {
+        System.out.println("==========");
+    }
+
+    public static void main(String[] args) {
+        printLine();                    // виклик методу
+        System.out.println("Звіт 1");
+        printLine();
+        System.out.println("Звіт 2");
+        printLine();
+        System.out.println("Звіт 3");
+    }
+}
+```
+
+Результат однаковий, але тепер, щоб змінити вигляд лінії (наприклад, на `----------`), достатньо змінити **один** рядок.
+
+---
+
+## 2. Будова методу
+
+Метод складається із **заголовка** і **тіла**:
+
+```java
+public static int sum(int a, int b) {   // заголовок
+    int result = a + b;                 // ┐
+    return result;                      // ┘ тіло
+}
+```
+
+| Частина | У прикладі | Що означає |
+|---|---|---|
+| модифікатор доступу | `public` | хто може викликати метод (необов'язковий) |
+| `static` | `static` | метод належить класу, а не об'єкту (див. розділ 7.3) |
+| тип результату | `int` | значення якого типу метод **повертає**; `void` — нічого не повертає |
+| ім'я | `sum` | як ми викликаємо метод |
+| список параметрів | `(int a, int b)` | які дані метод отримує на вхід; може бути порожнім: `()` |
+| тіло | `{ ... }` | команди, які виконує метод |
+
+**Сигнатура методу** — це його **ім'я + типи параметрів** (у тому порядку, як вони записані). Для прикладу вище сигнатура: `sum(int, int)`. Тип результату і модифікатори до сигнатури **не входять**. Це важливо для перевантаження (розділ 8).
+
+Загальна форма:
+
+```
+[модифікатори] типРезультату назваМетоду(тип1 параметр1, тип2 параметр2, ...) {
+    тіло методу
+}
+```
+
+---
+
+## 3. Правила оголошення методу
+
+**Обов'язкові правила** (інакше код не скомпілюється):
+
+1. Метод оголошується **всередині класу**, але **поза іншими методами**. Не можна оголосити метод усередині `main`.
+2. **Тип результату вказується завжди**: якщо метод нічого не повертає — пишемо `void`.
+3. Після імені **завжди** йдуть круглі дужки, навіть якщо параметрів немає: `printLine()`.
+4. **Кожен параметр має свій тип**: `(int a, int b)`, а не `(int a, b)`.
+5. Якщо тип результату не `void`, метод **зобов'язаний** повернути значення цього типу через `return` — на **кожному** можливому шляху виконання.
+6. Ім'я підпорядковується тим самим правилам, що й імена змінних: літери, цифри, `_`, `$`; не з цифри; не ключове слово.
+7. У класі не може бути двох методів з **однаковою сигнатурою**.
+
+**Конвенції** (домовленості):
+- ім'я методу — **дієслово** або фраза з дієсловом, у стилі `camelCase`: `calculateAverage`, `printReport`, `findMax`;
+- методи, що повертають `boolean`, часто починають з `is`, `has`, `can`: `isEven`, `hasAccess`, `canVote`;
+- один метод — **одна дія**. Якщо назва виходить на кшталт `readAndCalculateAndPrint` — метод варто розбити.
+
+```java
+public class DeclarationRules {
+
+    // Правильно: тип результату, ім'я-дієслово, параметри з типами
+    static double calculateArea(double width, double height) {
+        return width * height;
+    }
+
+    // Правильно: void — нічого не повертає
+    static void printGreeting() {
+        System.out.println("Вітаю!");
+    }
+
+    // Правильно: boolean-метод з префіксом is
+    static boolean isEven(int number) {
+        return number % 2 == 0;
+    }
+
+    // static calculate(int a) { return a; }        // ПОМИЛКА: не вказано тип результату
+    // static int sum(int a, b) { return a + b; }   // ПОМИЛКА: у параметра b немає типу
+    // static int getFive() { }                     // ПОМИЛКА: missing return statement
+    // static boolean isEven(int value) { return false; } // ПОМИЛКА: така сигнатура вже існує
+
+    public static void main(String[] args) {
+        // static void inner() { }                  // ПОМИЛКА: метод не можна оголосити всередині іншого методу
+
+        System.out.println(calculateArea(3, 4.5)); // 13.5
+        printGreeting();                           // Вітаю!
+        System.out.println(isEven(10));            // true
+    }
+}
+```
+
+> **Порядок оголошення не важливий.** Метод можна оголосити нижче за `main` і все одно викликати з `main` — компілятор бачить увесь клас цілком.
+
+---
+
+## 4. Виклик методу
+
+Щоб метод виконався, його треба **викликати**: написати ім'я і в дужках передати значення.
+
+Коли програма доходить до виклику:
+1. виконання **переходить** у тіло методу;
+2. команди методу виконуються по черзі;
+3. після завершення методу (або на `return`) виконання **повертається** в точку виклику і йде далі.
+
+```java
+public class CallOrder {
+
+    static void step() {
+        System.out.println("  — всередині методу step");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("1. Початок main");
+        step();
+        System.out.println("2. Повернулися в main");
+        step();
+        System.out.println("3. Кінець main");
+    }
+}
+```
+
+Результат:
+```
+1. Початок main
+  — всередині методу step
+2. Повернулися в main
+  — всередині методу step
+3. Кінець main
+```
+
+### Що можна зробити з результатом методу
+
+Якщо метод повертає значення, виклик методу **сам є значенням** цього типу. Його можна:
+
+```java
+public class UsingResult {
+
+    static int square(int x) {
+        return x * x;
+    }
+
+    public static void main(String[] args) {
+        int s = square(5);                    // зберегти у змінну
+        System.out.println(s);                // 25
+
+        System.out.println(square(3));        // одразу вивести: 9
+
+        int total = square(2) + square(3);    // використати у виразі: 4 + 9
+        System.out.println(total);            // 13
+
+        System.out.println(square(square(2))); // передати як аргумент іншому виклику: square(4) = 16
+
+        square(10);                           // результат можна проігнорувати (але навіщо тоді викликати?)
+    }
+}
+```
+
+### Методи можуть викликати інші методи
+
+```java
+public class MethodsCallMethods {
+
+    static int square(int x) {
+        return x * x;
+    }
+
+    // Метод використовує інший метод
+    static int sumOfSquares(int a, int b) {
+        return square(a) + square(b);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(sumOfSquares(3, 4)); // 25
+    }
+}
+```
+
+---
+
+## 5. Параметри і аргументи
+
+Ці два слова часто плутають:
+
+- **Параметр** — змінна, оголошена в **заголовку** методу. Це «порожня комірка», яку метод чекає отримати.
+- **Аргумент** — конкретне **значення**, яке передається під час **виклику**.
+
+```java
+public class ParamsAndArgs {
+
+    //                   параметри: name і age
+    static void introduce(String name, int age) {
+        System.out.println(name + ", " + age + " р.");
+    }
+
+    public static void main(String[] args) {
+        //        аргументи: "Олег" і 19
+        introduce("Олег", 19);   // Олег, 19 р.
+
+        String n = "Ірина";
+        int a = 20;
+        introduce(n, a);         // Ірина, 20 р.  (аргументами можуть бути змінні)
+
+        introduce("Максим", 18 + 1); // Максим, 19 р.  (і вирази)
+
+        // introduce(19, "Олег");    // ПОМИЛКА: неправильний порядок типів
+        // introduce("Олег");        // ПОМИЛКА: не вистачає аргументу
+    }
+}
+```
+
+**Правила передачі аргументів:**
+- кількість аргументів = кількості параметрів;
+- порядок аргументів = порядку параметрів;
+- тип кожного аргументу має збігатися з типом параметра **або автоматично до нього розширюватися** (`int → long → double` тощо, як у темі 1).
+
+```java
+public class ArgumentWidening {
+
+    static double half(double value) {
+        return value / 2;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(half(7.0)); // 3.5
+        System.out.println(half(7));   // 3.5   (int 7 автоматично розширився до double)
+        // System.out.println(half("7")); // ПОМИЛКА: String не перетворюється на double
+    }
+}
+```
+
+---
+
+## 6. Оператор return
+
+`return` робить дві речі:
+1. **негайно завершує** виконання методу;
+2. **повертає** значення в точку виклику (якщо метод не `void`).
+
+```java
+public class ReturnDemo {
+
+    // Повертає більше з двох чисел
+    static int max(int a, int b) {
+        if (a > b) {
+            return a;    // метод завершується тут, якщо a > b
+        }
+        return b;        // сюди доходимо лише якщо a <= b
+    }
+
+    // Повертає оцінку словами
+    static String markToText(int mark) {
+        if (mark == 5) {
+            return "відмінно";
+        }
+        if (mark == 4) {
+            return "добре";
+        }
+        if (mark == 3) {
+            return "задовільно";
+        }
+        return "незадовільно";
+    }
+
+    public static void main(String[] args) {
+        System.out.println(max(8, 3));     // 8
+        System.out.println(max(2, 9));     // 9
+        System.out.println(markToText(4)); // добре
+        System.out.println(markToText(1)); // незадовільно
+    }
+}
+```
+
+### return у void-методі
+
+У методі `void` можна написати `return;` **без значення** — це просто дострокове завершення методу. Так зручно перевіряти некоректні вхідні дані на самому початку.
+
+```java
+public class VoidReturn {
+
+    static void printSquareRoot(double x) {
+        if (x < 0) {
+            System.out.println("Помилка: від'ємне число");
+            return;                       // далі метод не виконується
+        }
+        System.out.println(Math.sqrt(x));
+    }
+
+    public static void main(String[] args) {
+        printSquareRoot(16);  // 4.0
+        printSquareRoot(-4);  // Помилка: від'ємне число
+    }
+}
+```
+
+### Типові помилки з return
+
+```java
+public class ReturnErrors {
+
+    static int sign(int x) {
+        if (x > 0) {
+            return 1;
+        }
+        if (x < 0) {
+            return -1;
+        }
+        return 0;   // без цього рядка — ПОМИЛКА missing return statement:
+                    // компілятор бачить шлях, на якому метод нічого не повертає
+    }
+
+    static int doubleIt(int x) {
+        return x * 2;
+        // System.out.println("Ніколи"); // ПОМИЛКА: unreachable statement — код після return недосяжний
+    }
+
+    // static void hello() { return "Привіт"; } // ПОМИЛКА: void-метод не може повертати значення
+    // static int five() { return "5"; }        // ПОМИЛКА: тип значення не збігається з типом результату
+
+    public static void main(String[] args) {
+        System.out.println(sign(-7));    // -1
+        System.out.println(doubleIt(21)); // 42
+    }
+}
+```
+
+---
+
+## 7. Види методів
+
+Методи можна класифікувати за кількома ознаками.
+
+### 7.1. За результатом: void і методи, що повертають значення
+
+| | `void`-метод | метод з результатом |
+|---|---|---|
+| що робить | **виконує дію** (виводить, змінює) | **обчислює** і повертає значення |
+| тип результату | `void` | будь-який тип: `int`, `double`, `String`, `boolean`… |
+| `return` | не обов'язковий; лише `return;` | обов'язковий: `return значення;` |
+| виклик | окремою командою: `printLine();` | у виразі: `int x = sum(2, 3);` |
+
+```java
+public class VoidVsReturn {
+
+    // void: виконує дію
+    static void printSum(int a, int b) {
+        System.out.println("Сума: " + (a + b));
+    }
+
+    // з результатом: обчислює і повертає
+    static int sum(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+        printSum(2, 3);            // Сума: 5
+
+        int s = sum(2, 3);         // результат можна зберегти...
+        System.out.println(s * 10); // 50  ...і використати далі
+
+        // int x = printSum(2, 3); // ПОМИЛКА: void-метод нічого не повертає
+    }
+}
+```
+
+> **Порада.** Метод, що **повертає** результат, корисніший: результат можна вивести, зберегти, передати далі. Метод, що лише **виводить** результат, можна використати тільки для виведення.
+
+### 7.2. За параметрами
+
+- **без параметрів** — `printLine()`;
+- **з фіксованою кількістю параметрів** — `sum(int a, int b)`;
+- **зі змінною кількістю аргументів** (varargs) — `sum(int... numbers)`, див. розділ 9.
+
+```java
+public class ByParameters {
+
+    static void printLine() {                 // без параметрів
+        System.out.println("----------");
+    }
+
+    static void printLine(int length) {        // один параметр
+        for (int i = 0; i < length; i++) {
+            System.out.print("-");
+        }
+        System.out.println();
+    }
+
+    static void printLine(int length, char symbol) { // два параметри
+        for (int i = 0; i < length; i++) {
+            System.out.print(symbol);
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        printLine();            // ----------
+        printLine(5);           // -----
+        printLine(7, '*');      // *******
+    }
+}
+```
+
+### 7.3. Статичні методи і методи об'єкта
+
+**Статичний метод** (`static`) належить **класу**. Його викликають через ім'я класу, і для цього не потрібно створювати об'єкт:
+
+```java
+Math.sqrt(25);            // клас Math, статичний метод sqrt
+Integer.parseInt("42");   // клас Integer, статичний метод parseInt
+```
+
+Усередині того самого класу ім'я класу можна не писати: `sum(2, 3)` замість `Main.sum(2, 3)`.
+
+**Метод об'єкта** (нестатичний, без `static`) належить конкретному **об'єкту** і працює з його даними. Викликається через змінну-об'єкт і крапку:
+
+```java
+String name = "Java";
+name.length();            // метод об'єкта name
+name.toUpperCase();       // теж метод об'єкта
+```
+
+Детально об'єкти і класи розглядаються в темі ООП. Поки що важливо запам'ятати різницю:
+
+```java
+public class StaticVsInstance {
+
+    // Статичний метод — працює лише з тим, що отримав у параметрах
+    static int add(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+        // Статичні методи: викликаємо без об'єкта
+        System.out.println(add(2, 3));              // 5
+        System.out.println(StaticVsInstance.add(4, 4)); // 8   (повна форма: Клас.метод)
+        System.out.println(Math.max(10, 20));       // 20
+
+        // Методи об'єкта: потрібен об'єкт
+        String word = "кадет";
+        System.out.println(word.length());          // 5
+        System.out.println(word.toUpperCase());     // КАДЕТ
+
+        Counter c = new Counter();                  // створили об'єкт
+        c.increment();                              // викликали метод об'єкта
+        c.increment();
+        System.out.println(c.getValue());           // 2
+
+        // Counter.increment();  // ПОМИЛКА: нестатичний метод не можна викликати без об'єкта
+    }
+}
+
+// Простий клас з методами об'єкта (без static)
+class Counter {
+    int value;
+
+    void increment() {
+        value++;          // метод змінює дані СВОГО об'єкта
+    }
+
+    int getValue() {
+        return value;
+    }
+}
+```
+
+> **Важливе правило.** Зі статичного методу (наприклад, `main`) можна напряму викликати лише **статичні** методи свого класу. Тому всі методи, які ви поки пишете поруч із `main`, мають бути `static`. Якщо забути `static`, компілятор видасть помилку `non-static method ... cannot be referenced from a static context`.
+
+### 7.4. За модифікатором доступу
+
+Модифікатор доступу визначає, **звідки** можна викликати метод:
+
+| Модифікатор | Де доступний метод |
+|---|---|
+| `public` | звідусіль |
+| `protected` | у своєму пакеті та в класах-нащадках |
+| *(без модифікатора)* | лише у своєму пакеті |
+| `private` | лише всередині свого класу |
+
+Поки ви пишете все в одному класі, різниці не помітите. Модифікатори стануть важливими в темі ООП (інкапсуляція).
+
+---
+
+## 8. Перевантаження методів
+
+**Перевантаження** (overloading) — це кілька методів з **однаковим іменем**, але **різними списками параметрів**. Java визначає, який з них викликати, за **аргументами**.
+
+Навіщо: одна й та сама за змістом дія може виконуватися з різними даними. Замість `sumTwoInts`, `sumThreeInts`, `sumTwoDoubles` — одна назва `sum`. Ви вже користувалися перевантаженням: `System.out.println` має окремі версії для `int`, `double`, `String`, `char` тощо.
+
+**Методи вважаються перевантаженими, якщо відрізняються:**
+- **кількістю** параметрів, **або**
+- **типами** параметрів, **або**
+- **порядком** типів параметрів.
+
+**НЕ є перевантаженням (помилка компіляції):**
+- відрізняється **лише тип результату**;
+- відрізняються **лише імена** параметрів.
+
+```java
+public class Overloading {
+
+    static int sum(int a, int b) {                 // sum(int, int)
+        return a + b;
+    }
+
+    static int sum(int a, int b, int c) {          // sum(int, int, int) — інша кількість
+        return a + b + c;
+    }
+
+    static double sum(double a, double b) {        // sum(double, double) — інші типи
+        return a + b;
+    }
+
+    static String describe(String name, int age) { // describe(String, int)
+        return name + " (" + age + ")";
+    }
+
+    static String describe(int age, String name) { // describe(int, String) — інший порядок
+        return age + " років: " + name;
+    }
+
+    // static double sum(int x, int y) { return x + y; } // ПОМИЛКА: відрізняється лише тип результату та імена
+    // static int sum(int x, int y) { return x + y; }    // ПОМИЛКА: відрізняються лише імена параметрів
+
+    public static void main(String[] args) {
+        System.out.println(sum(2, 3));           // 5     → sum(int, int)
+        System.out.println(sum(2, 3, 4));        // 9     → sum(int, int, int)
+        System.out.println(sum(2.5, 3.5));       // 6.0   → sum(double, double)
+        System.out.println(describe("Ігор", 20)); // Ігор (20)
+        System.out.println(describe(20, "Ігор")); // 20 років: Ігор
+    }
+}
+```
+
+### Як Java обирає метод
+
+1. Спочатку шукає метод, у якого типи параметрів **точно** збігаються з типами аргументів.
+2. Якщо такого немає — пробує **автоматичне розширення** типів (`byte → short → int → long → float → double`, `char → int`) і обирає **найближчий** варіант.
+3. Якщо підходять кілька варіантів однаково добре — **помилка неоднозначності** (ambiguous).
+
+```java
+public class OverloadResolution {
+
+    static void show(int x) {
+        System.out.println("int: " + x);
+    }
+
+    static void show(double x) {
+        System.out.println("double: " + x);
+    }
+
+    static void pair(int a, double b) {
+        System.out.println("pair(int, double)");
+    }
+
+    static void pair(double a, int b) {
+        System.out.println("pair(double, int)");
+    }
+
+    public static void main(String[] args) {
+        show(5);        // int: 5         (точний збіг)
+        show(5.0);      // double: 5.0    (точний збіг)
+        show(5L);       // double: 5.0    (методу для long немає → long розширився до double)
+        show('A');      // int: 65        (char розширився до int — найближчий варіант)
+
+        byte b = 7;
+        show(b);        // int: 7         (byte → int ближче, ніж byte → double)
+
+        pair(1, 2.0);   // pair(int, double)
+        // pair(1, 2);  // ПОМИЛКА: reference to pair is ambiguous — обидва варіанти підходять однаково
+    }
+}
+```
+
+---
+
+## 9. Методи зі змінною кількістю аргументів
+
+Іноді заздалегідь невідомо, скільки значень передадуть у метод: два, п'ять чи жодного. Для цього існують **varargs** (variable arguments): після типу параметра ставлять три крапки `...`.
+
+```java
+static int sum(int... numbers) { ... }
+```
+
+Усередині методу параметр `numbers` — це **масив** (упорядкований набір значень одного типу):
+- `numbers.length` — скільки значень передали;
+- `numbers[0]`, `numbers[1]` … — звернення до значення за номером (індексом), нумерація з **нуля**.
+
+```java
+public class Varargs {
+
+    static int sum(int... numbers) {
+        int total = 0;
+        for (int i = 0; i < numbers.length; i++) {
+            total += numbers[i];
+        }
+        return total;
+    }
+
+    // varargs можна поєднувати зі звичайними параметрами,
+    // але varargs-параметр має бути ОСТАННІМ
+    static void printAll(String title, int... values) {
+        System.out.print(title + ": ");
+        for (int i = 0; i < values.length; i++) {
+            System.out.print(values[i] + " ");
+        }
+        System.out.println("(усього " + values.length + ")");
+    }
+
+    // static void wrong(int... a, String s) { }  // ПОМИЛКА: varargs має бути останнім
+    // static void wrong2(int... a, int... b) { } // ПОМИЛКА: varargs може бути лише один
+
+    public static void main(String[] args) {
+        System.out.println(sum());              // 0   (можна не передати жодного значення)
+        System.out.println(sum(5));             // 5
+        System.out.println(sum(1, 2, 3));       // 6
+        System.out.println(sum(1, 2, 3, 4, 5)); // 15
+
+        int[] marks = {5, 4, 4, 3};
+        System.out.println(sum(marks));         // 16  (можна передати готовий масив)
+
+        printAll("Оцінки", 5, 4, 5);            // Оцінки: 5 4 5 (усього 3)
+        printAll("Порожньо");                   // Порожньо: (усього 0)
+    }
+}
+```
+
+**Правила varargs:**
+- у методі може бути **лише один** varargs-параметр;
+- він має бути **останнім** у списку параметрів;
+- можна передати **0, 1 або скільки завгодно** аргументів, або готовий масив.
+
+---
+
+## 10. Як передаються аргументи: передача за значенням
+
+У Java аргументи **завжди передаються за значенням**: метод отримує **копію** значення аргументу.
+
+### Примітивні типи
+
+Метод отримує копію числа. Зміна параметра всередині методу **не впливає** на змінну, яку передали.
+
+```java
+public class PassPrimitive {
+
+    static void tryToChange(int x) {
+        x = 100;                                    // змінюємо КОПІЮ
+        System.out.println("Всередині методу: " + x); // Всередині методу: 100
+    }
+
+    public static void main(String[] args) {
+        int number = 5;
+        tryToChange(number);
+        System.out.println("Після виклику: " + number); // Після виклику: 5  (оригінал не змінився!)
+    }
+}
+```
+
+Якщо метод має змінити значення — нехай він його **поверне**, а ми збережемо результат:
+
+```java
+public class ReturnInsteadOfChange {
+
+    static int addBonus(int score) {
+        return score + 10;
+    }
+
+    public static void main(String[] args) {
+        int score = 50;
+        score = addBonus(score);   // зберігаємо повернене значення
+        System.out.println(score); // 60
+    }
+}
+```
+
+### Посилальні типи (масиви, об'єкти)
+
+Змінна посилального типу зберігає **посилання** на об'єкт. Метод отримує **копію посилання** — але воно вказує на **той самий** об'єкт. Тому зміни **вмісту** масиву чи об'єкта всередині методу **видно ззовні**.
+
+```java
+public class PassReference {
+
+    static void doubleFirst(int[] arr) {
+        arr[0] = arr[0] * 2;     // змінюємо вміст того самого масиву
+    }
+
+    public static void main(String[] args) {
+        int[] data = {10, 20, 30};
+        doubleFirst(data);
+        System.out.println(data[0]); // 20  (масив змінився!)
+    }
+}
+```
+
+> **Підсумок:** примітив — метод працює з копією числа, оригінал не змінюється. Масив або об'єкт — метод працює з тим самим об'єктом, зміни вмісту видно ззовні.
+
+---
+
+## 11. Область видимості змінних
+
+**Локальна змінна** — змінна, оголошена всередині методу (включно з параметрами). Вона:
+- існує лише **під час виконання** методу;
+- видима лише **всередині** цього методу (точніше — всередині блоку `{ }`, де її оголошено);
+- **не видна** іншим методам.
+
+Тому в різних методах можна мати змінні з **однаковими іменами** — це **різні** змінні.
+
+```java
+public class Scope {
+
+    static int calculate() {
+        int result = 42;      // локальна змінна методу calculate
+        return result;
+    }
+
+    static void show() {
+        int result = 7;       // ІНША змінна з тим самим іменем
+        System.out.println("show: " + result);
+        // System.out.println(total); // ПОМИЛКА: змінна total з main тут не видна
+    }
+
+    public static void main(String[] args) {
+        int total = calculate();
+        System.out.println("main: " + total);   // main: 42
+        show();                                  // show: 7
+        // System.out.println(result);           // ПОМИЛКА: result — локальна змінна іншого методу
+
+        if (total > 0) {
+            int inside = 1;                      // видна лише в блоці if
+            System.out.println(inside);          // 1
+        }
+        // System.out.println(inside);           // ПОМИЛКА: inside поза своїм блоком
+    }
+}
+```
+
+### Статичні поля
+
+Якщо змінна потрібна **кільком** методам, її можна оголосити **в класі, поза методами**, зі словом `static`. Така змінна називається **статичним полем**: вона існує весь час роботи програми і доступна всім статичним методам класу.
+
+На відміну від локальних змінних, поля **отримують значення за замовчуванням** (`0`, `0.0`, `false`, `null`).
+
+```java
+public class StaticField {
+
+    static int callCount;               // статичне поле, за замовчуванням 0
+    static final double VAT = 0.2;      // константа класу: static final
+
+    static double priceWithVat(double price) {
+        callCount++;                    // метод змінює спільне поле
+        return price + price * VAT;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(priceWithVat(100)); // 120.0
+        System.out.println(priceWithVat(50));  // 60.0
+        System.out.println("Викликів: " + callCount); // Викликів: 2
+    }
+}
+```
+
+> **Порада.** Не зловживайте статичними полями: якщо даних можна передати через параметри і повернути через `return` — так краще. Метод, який залежить лише від своїх параметрів, легше зрозуміти й перевірити.
+
+### final-параметри
+
+Параметр можна позначити `final` — тоді всередині методу йому не можна присвоїти нове значення. Це захищає від випадкової зміни вхідних даних.
+
+```java
+public class FinalParam {
+
+    static double circleArea(final double radius) {
+        // radius = 10;                // ПОМИЛКА: final parameter radius may not be assigned
+        return Math.PI * radius * radius;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Math.round(circleArea(2))); // 13
+    }
+}
+```
+
+---
+
+## 12. Рекурсія
+
+**Рекурсивний метод** — метод, який **викликає сам себе**. Кожна рекурсія має дві обов'язкові частини:
+1. **базовий випадок** — умова, коли метод **не** викликає себе, а одразу повертає відповідь;
+2. **рекурсивний крок** — виклик самого себе з **меншими** (простішими) даними.
+
+Без базового випадку метод викликатиме себе нескінченно, і програма аварійно завершиться з помилкою `StackOverflowError`.
+
+Класичний приклад — **факторіал**: `n! = 1 · 2 · 3 · … · n`, причому `n! = n · (n − 1)!` і `1! = 1`.
+
+```java
+public class Recursion {
+
+    static long factorial(int n) {
+        if (n <= 1) {
+            return 1;                    // базовий випадок
+        }
+        return n * factorial(n - 1);     // рекурсивний крок
+    }
+
+    // Зворотний відлік рекурсією
+    static void countdown(int n) {
+        if (n == 0) {
+            System.out.println("Старт!");
+            return;
+        }
+        System.out.println(n);
+        countdown(n - 1);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(factorial(5));  // 120   (5 * 4 * 3 * 2 * 1)
+        System.out.println(factorial(10)); // 3628800
+        countdown(3);                      // 3, 2, 1, Старт! — кожне з нового рядка
+    }
+}
+```
+
+Як обчислюється `factorial(4)`:
+```
+factorial(4) = 4 * factorial(3)
+                   factorial(3) = 3 * factorial(2)
+                                      factorial(2) = 2 * factorial(1)
+                                                         factorial(1) = 1   ← базовий випадок
+                                      factorial(2) = 2 * 1 = 2
+                   factorial(3) = 3 * 2 = 6
+factorial(4) = 4 * 6 = 24
+```
+
+> Рекурсія — зручний інструмент для деяких задач, але будь-яку задачу з цієї теми можна розв'язати і звичайним циклом.
+
+---
+
+## 13. Як писати хороші методи
+
+1. **Одна дія — один метод.** Метод `calculateAverage` рахує середнє, а не ще й виводить меню.
+2. **Влучна назва-дієслово.** З назви має бути зрозуміло, що робить метод, без читання його тіла.
+3. **Короткий метод.** Якщо метод не вміщується на екран — розбийте його на кілька менших.
+4. **Повертайте результат, а не виводьте його.** Виводити краще в `main` або в окремому методі.
+5. **Не більше 3–4 параметрів.** Якщо параметрів більше — можливо, метод робить забагато.
+6. **Документуйте.** Перед методом можна написати коментар **Javadoc** (`/** ... */`): IDE показує його як підказку під час виклику.
+
+```java
+public class GoodMethods {
+
+    /**
+     * Обчислює середнє арифметичне трьох оцінок.
+     *
+     * @param a перша оцінка
+     * @param b друга оцінка
+     * @param c третя оцінка
+     * @return середнє значення
+     */
+    static double average(int a, int b, int c) {
+        return (a + b + c) / 3.0;
+    }
+
+    /**
+     * Перевіряє, чи склав курсант залік (середній бал не нижче 3).
+     */
+    static boolean isPassed(double averageMark) {
+        return averageMark >= 3;
+    }
+
+    static void printResult(String name, double averageMark) {
+        System.out.println(name + ": " + averageMark + (isPassed(averageMark) ? " — склав" : " — не склав"));
+    }
+
+    public static void main(String[] args) {
+        double avg = average(4, 5, 3);
+        printResult("Литвин", avg);           // Литвин: 4.0 — склав
+        printResult("Бондар", average(2, 3, 2)); // Бондар: 2.3333333333333335 — не склав
+    }
+}
+```
+
+> Конструкція `умова ? значення1 : значення2` — **тернарний оператор**: якщо умова істинна, результат — `значення1`, інакше — `значення2`.
+
+---
+
+## 14. Шпаргалка: типові помилки
+
+| Помилка | Чому | Як правильно |
+|---|---|---|
+| `static sum(int a, int b)` | не вказано тип результату | `static int sum(int a, int b)` |
+| `static int sum(int a, b)` | у кожного параметра має бути тип | `(int a, int b)` |
+| метод оголошено всередині `main` | методи оголошуються лише в класі | винести метод за межі `main` |
+| `missing return statement` | є шлях виконання без `return` | додати `return` в кінці методу |
+| `int x = printSum(2, 3);` | `void`-метод нічого не повертає | змінити метод так, щоб він повертав `int` |
+| `non-static method ... cannot be referenced from a static context` | з `main` викликається нестатичний метод | додати `static` до оголошення методу |
+| два методи відрізняються лише типом результату | це не перевантаження | змінити типи / кількість параметрів |
+| змінили параметр-примітив і чекаєте, що зміниться оригінал | передача за значенням | повернути нове значення через `return` |
+| `unreachable statement` | код після `return` | прибрати або перенести код |
+| рекурсія без базового випадку | `StackOverflowError` | додати умову виходу |
+
+
